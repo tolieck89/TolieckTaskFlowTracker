@@ -1,36 +1,35 @@
 import { Formik } from 'formik';
 import { Form, Input, Button, Select } from 'antd';
 import { useDispatch } from 'react-redux';
-import { createProject } from './projectsSlice';
+import { createProject, updateProject } from './projectsSlice';
 
-const ProjectForm = ({ onSuccess }) => {
+   const ProjectForm = ({ initialValues, mode = 'create', onSuccess }) => {
   const dispatch = useDispatch();
+
+  const isEdit = mode === 'edit';
 
   return (
     <Formik
-      initialValues={{
-        name: '',
-        description: '',
-        issueTypes: [],
-      }}
-      validate={(values) => {
-        const errors = {};
-        if (!values.name) errors.name = 'Обовʼязкове поле';
-        return errors;
-      }}
+      initialValues={
+        initialValues || {
+          name: '',
+          description: '',
+          issueTypes: [],
+        }
+      }
       onSubmit={(values, { resetForm }) => {
-        dispatch(createProject(values));
+        if (isEdit) {
+          dispatch(updateProject(values));
+        } else {
+          dispatch(createProject(values));
+        }
         resetForm();
-        onSuccess(); // закриваємо модалку
+        onSuccess();
       }}
     >
-      {({ values, handleChange, handleSubmit, errors, touched, setFieldValue }) => (
+      {({ values, handleChange, handleSubmit, setFieldValue }) => (
         <Form layout="vertical" onFinish={handleSubmit}>
-          <Form.Item
-            label="Назва"
-            validateStatus={errors.name && touched.name ? 'error' : ''}
-            help={errors.name && touched.name && errors.name}
-          >
+          <Form.Item label="Назва">
             <Input name="name" value={values.name} onChange={handleChange} />
           </Form.Item>
 
@@ -46,14 +45,13 @@ const ProjectForm = ({ onSuccess }) => {
             <Select
               mode="tags"
               value={values.issueTypes}
-              onChange={(val) => setFieldValue('issueTypes', val)}
-              placeholder="Введи типи задач"
+              onChange={(value) => setFieldValue('issueTypes', value)}
             />
           </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Зберегти
+              {isEdit ? 'Зберегти зміни' : 'Створити проєкт'}
             </Button>
           </Form.Item>
         </Form>
@@ -62,4 +60,4 @@ const ProjectForm = ({ onSuccess }) => {
   );
 };
 
-export default ProjectForm;
+export  default  ProjectForm 

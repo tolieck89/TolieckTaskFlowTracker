@@ -1,28 +1,10 @@
-import { useState } from 'react';
-import { Modal, Button } from 'antd';
-import ProjectForm from './ProjectForm';
+import { Modal } from 'antd';
 
-const ProjectModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleOpen = () => setIsOpen(true);
-  const handleClose = () => setIsOpen(false);
-
+const ProjectModal = ({ open, onClose, title, children }) => {
   return (
-    <>
-      <Button type="primary" onClick={handleOpen}>
-        Створити проєкт
-      </Button>
-
-      <Modal
-        title="Новий проєкт"
-        open={isOpen}
-        onCancel={handleClose}
-        footer={null} // бо сабміт буде в формі
-      >
-        <ProjectForm onSuccess={handleClose} />
-      </Modal>
-    </>
+    <Modal open={open} onCancel={onClose} footer={null} title={title}>
+      {children}
+    </Modal>
   );
 };
 

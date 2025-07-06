@@ -1,9 +1,13 @@
 #root{
     margin: 0 auto;
     max-width: 1600px;
-    padding: 16px;
+    padding: 0 16px;
 
 }
+
+
+
+
 
 @media (max-width: 768px) {
   .wrapper {
