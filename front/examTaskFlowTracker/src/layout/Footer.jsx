@@ -3,7 +3,7 @@ const { Footer } = Layout;
 
 const AppFooter = () => (
   <Footer style={{ textAlign: 'center' }}>
-    TaskFlow © {new Date().getFullYear()} — зроблено з ❤️
+    TaskFlow © {new Date().getFullYear()} — зроблено with RAGE!
   </Footer>
 );
 

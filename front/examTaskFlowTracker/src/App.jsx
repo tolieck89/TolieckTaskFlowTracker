@@ -1,7 +1,6 @@
 import { ConfigProvider } from 'antd'
 import { useState, useEffect } from 'react'
 import { useAppSelector } from './app/hooks';
-
 import ProjectList from './features/projects/ProjectList';
 import ProjectModal from './features/projects/ProjectModal';
 import MainLayout from './layout/MainLayout';
@@ -11,12 +10,14 @@ import TaskFormModal from './features/tasks/TaskFormModal'
 import ModalButton from './app/ui/ModalButton'
 import TaskForm from './features/tasks/TaskForm';
 import ProjectForm from './features/projects/ProjectForm';
-
+import RoleAccess from './features/users/RoleAccess';
+import TaskList from './features/tasks/TaskList'
 
 
 function App() {
   // const [isDarkMode, setIsDarkMode] = useState(false);
     const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+    // eslint-disable-next-line no-unused-vars
     const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
@@ -51,6 +52,8 @@ function App() {
   )}
 </ModalButton>
 
+<RoleAccess allowedRoles={['admin']}>
+
 <ModalButton buttonText="➕ Створити проєкт" modalTitle="Новий проєкт">
   {({ onSuccess }) => (
     <ProjectForm onSuccess={() => {
@@ -59,6 +62,7 @@ function App() {
     }} />
   )}
 </ModalButton>
+</RoleAccess>
 
         <ProjectList />
               <UserList />
@@ -74,7 +78,8 @@ function App() {
 
 
      
-      
+      <TaskList />
+
     </ConfigProvider>
   )
 }

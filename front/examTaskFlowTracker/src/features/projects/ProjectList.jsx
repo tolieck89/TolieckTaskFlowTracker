@@ -5,6 +5,7 @@ import { deleteProject } from './projectsSlice';
 import { useState } from 'react';
 import ProjectModal from './ProjectModal';
 import ProjectForm from './ProjectForm';
+import ProjectTask from '../tasks/ProjectTasks'
 
 
 
@@ -36,6 +37,10 @@ const ProjectList = () => {
           <Card title={project.name}>
           
             <p>{project.description}</p>
+            <h4>Задачі цього проєкту:</h4>
+
+            <ProjectTask projectId={project.id} />
+
             <p style={{ fontSize: '12px', color: '#999' }}>
               Created: {new Date(project.createdAt).toLocaleString()}
             </p>

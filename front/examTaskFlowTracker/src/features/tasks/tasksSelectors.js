@@ -1,4 +1,8 @@
-export const selectTasks = state => state.tasks.list;
+import { createSelector } from '@reduxjs/toolkit';
 
-export const selectTasksByProjectId = (projectId) => (state) =>
-  state.tasks.list.filter(task => task.projectId === projectId);
+export const selectTasks = (state) => state.tasks.list;
+
+export const selectTasksByProjectId = (projectId) =>
+  createSelector([selectTasks], (tasks) =>
+    tasks.filter((task) => task.projectId === projectId)
+  );

@@ -2,7 +2,7 @@ import { Formik } from 'formik';
 import { Form, Input, Button, Select } from 'antd';
 import { useDispatch } from 'react-redux';
 import { createProject, updateProject } from './projectsSlice';
-
+import projectValidationSchema from '../../app/validation/projectSchema'
    const ProjectForm = ({ initialValues, mode = 'create', onSuccess }) => {
   const dispatch = useDispatch();
 
@@ -15,8 +15,12 @@ import { createProject, updateProject } from './projectsSlice';
           name: '',
           description: '',
           issueTypes: [],
+          
         }
       }
+      
+      validationSchema = {projectValidationSchema}
+
       onSubmit={(values, { resetForm }) => {
         if (isEdit) {
           dispatch(updateProject(values));
@@ -27,13 +31,18 @@ import { createProject, updateProject } from './projectsSlice';
         onSuccess();
       }}
     >
-      {({ values, handleChange, handleSubmit, setFieldValue }) => (
+      {({ values, handleChange, handleSubmit, setFieldValue, errors, touched }) => (
         <Form layout="vertical" onFinish={handleSubmit}>
-          <Form.Item label="Назва">
+          <Form.Item label="Назва"
+           validateStatus={touched.name && errors.name ? 'error' : ''}
+  help={touched.name && errors.name ? errors.name : ''}>
+             
             <Input name="name" value={values.name} onChange={handleChange} />
           </Form.Item>
 
-          <Form.Item label="Опис">
+          <Form.Item label="Опис"
+            validateStatus={touched.description && errors.description ? 'error' : ''}
+  help={touched.description && errors.description ? errors.description : ''}>
             <Input.TextArea
               name="description"
               value={values.description}
@@ -41,7 +50,9 @@ import { createProject, updateProject } from './projectsSlice';
             />
           </Form.Item>
 
-          <Form.Item label="Типи задач">
+          <Form.Item label="Типи задач"
+            validateStatus={touched.issueTypes && errors.issueTypes ? 'error' : ''}
+  help={touched.issueTypes && errors.issueTypes ? errors.issueTypes : ''}>
             <Select
               mode="tags"
               value={values.issueTypes}

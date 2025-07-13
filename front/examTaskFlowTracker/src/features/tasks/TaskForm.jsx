@@ -4,11 +4,13 @@ import { useSelector } from 'react-redux';
 import { selectUsers } from '../users/usersSelector';
 import { selectProjects } from '../projects/projectsSelectors'; 
 import { useDispatch } from 'react-redux';
-import { createTask } from './TaskSlice'
-
+import { createTask, updateTask } from './TaskSlice'
+import { EditFilled } from '@ant-design/icons';
+import validationSchema from '../../app/validation/taskSchema'
 
  
-const TaskForm = ({onSuccess }) => {
+const TaskForm = ({onSuccess, initialValues, mode = "create"}) => {
+    const isEdit = mode === 'edit';
     const users = useSelector(selectUsers);
     const projects = useSelector(selectProjects);
     const dispatch = useDispatch();
@@ -19,14 +21,20 @@ const TaskForm = ({onSuccess }) => {
 return  (
  
  <Formik
-  initialValues={{ 
+  initialValues={ initialValues || {
     title: '',  description: '',
     status: 'todo',
+    
     priority: 'medium',
 assignedTo: '',
 projectId: '', }}
+      validationSchema={validationSchema}
+
   onSubmit={(values, {resetForm}) => {
-        dispatch(createTask(values));
+      if(isEdit){
+        dispatch(updateTask(values))
+      } else {
+        dispatch(createTask(values));}
      resetForm();
     console.log(values)
     onSuccess();}}
@@ -109,7 +117,8 @@ projectId: '', }}
 
 
       <Button type="primary" htmlType="submit">
-        Створити
+          {isEdit ? 'Зберегти зміни' : 'Створити'}
+
       </Button>
     </Form>
   )}
