@@ -3,11 +3,16 @@ import { Formik, Field } from 'formik';
 import { useSelector } from 'react-redux';
 import { selectUsers } from '../users/usersSelector';
 import { selectProjects } from '../projects/projectsSelectors'; 
+import { useDispatch } from 'react-redux';
+import { createTask } from './TaskSlice'
+
 
  
 const TaskForm = ({onSuccess }) => {
     const users = useSelector(selectUsers);
     const projects = useSelector(selectProjects);
+    const dispatch = useDispatch();
+
 
 
 
@@ -20,7 +25,9 @@ return  (
     priority: 'medium',
 assignedTo: '',
 projectId: '', }}
-  onSubmit={(values) => {
+  onSubmit={(values, {resetForm}) => {
+        dispatch(createTask(values));
+     resetForm();
     console.log(values)
     onSuccess();}}
 >
