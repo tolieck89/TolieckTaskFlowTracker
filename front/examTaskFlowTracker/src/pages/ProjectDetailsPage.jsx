@@ -1,29 +1,34 @@
 import { Table, Tag } from 'antd';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch} from 'react-redux';
 import { selectTasksByProjectId } from '../features/tasks/tasksSelectors';
-import { selectUsers } from '../features/users/usersSelector';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants/taskOptions';
+import {useEffect} from 'react';
+import {fetchTasks} from '../features/tasks/TaskSlice'
 
-const ProjectTasks = () => {
+
+const ProjectDetailsPage = () => {
+  const dispatch = useDispatch();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
+    useEffect(() => {
+    dispatch(fetchTasks()); 
+  }, [dispatch]);
 
   const statusFilter = searchParams.get('status');
   const priorityFilter = searchParams.get('priority');
 
-  const tasks = useSelector((state) =>
+  const allTasks = useSelector((state) =>
     selectTasksByProjectId(state, projectId)
   );
-  const users = useSelector(selectUsers);
 
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = allTasks?.filter((task) => {
     const matchStatus = statusFilter ? task.status === statusFilter : true;
     const matchPriority = priorityFilter ? task.priority === priorityFilter : true;
     return matchStatus && matchPriority;
-  });
+  }) || [];
 
   const columns = [
     {
@@ -38,35 +43,6 @@ const ProjectTasks = () => {
           {text}
         </span>
       ),
-    },
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Assignee',
-      dataIndex: 'assignedTo',
-      key: 'assignedTo',
-      render: (userId) => users.find((u) => u.id === userId)?.name || '—',
-    },
-    {
-      title: 'Creator',
-      dataIndex: 'createdBy',
-      key: 'createdBy',
-      render: (id) => users.find((u) => u.id === id)?.name || '—',
-    },
-    {
-      title: 'Created At',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (val) => new Date(val).toLocaleString(),
-    },
-    {
-      title: 'Updated At',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
-      render: (val) => new Date(val).toLocaleString(),
     },
     {
       title: 'Статус',
@@ -102,6 +78,10 @@ const ProjectTasks = () => {
     },
   ];
 
+  console.log('projectId:', projectId);
+console.log('allTasks:', allTasks);
+
+
   return (
     <div style={{ padding: 24 }}>
       <h2>Задачі в проєкті</h2>
@@ -112,10 +92,9 @@ const ProjectTasks = () => {
           </Tag>
         </div>
       )}
-
       <Table columns={columns} dataSource={filteredTasks} rowKey="id" />
     </div>
   );
 };
 
-export default ProjectTasks;
+export default ProjectDetailsPage;

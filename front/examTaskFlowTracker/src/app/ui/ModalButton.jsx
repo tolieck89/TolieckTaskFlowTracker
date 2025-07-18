@@ -1,30 +1,35 @@
-import { useState } from 'react';
-import { Button, Modal } from 'antd';
+import { useState } from "react";
+import { Button, Modal } from "antd";
 
-const ModalButton = ({buttonText, modalTitle, children}) => {
+const ModalButton = ({ buttonText, modalTitle, children }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-    const [isOpen, setIsOpen] = useState(false);
-    
-    const openModal = () => setIsOpen(true);
-    const closeModal = () => setIsOpen(false);
+  const openModal = () => {
+    console.log(' відкриваємо модалку');
+    setIsOpen(true);
+  };
 
-    return (
-       <>
-        <Button
-            onClick={openModal}>{buttonText}
-        </Button>
+  const closeModal = () => {
+    console.log('закриваємо модалку');
+    setIsOpen(false);
+  };
 
-        <Modal 
-            title={modalTitle}
-            open={isOpen}
-            onCancel={closeModal}
-            footer={null} 
-        >
-        {typeof children === 'function' ? children({ onSuccess: closeModal }) : children}
+  return (
+    <>
+      <Button onClick={openModal}>{buttonText}</Button>
 
-        </Modal>
-        </>
-    )
-}
+      <Modal
+        title={modalTitle}
+        open={isOpen}
+        onCancel={closeModal}
+        footer={null}
+      >
+        {typeof children === 'function'
+          ? children({ onSuccess: closeModal })
+          : children}
+      </Modal>
+    </>
+  );
+};
 
-export default  ModalButton;
+export default ModalButton;

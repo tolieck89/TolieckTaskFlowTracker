@@ -1,129 +1,169 @@
- import {Form, Input, Button, Select} from 'antd'
-import { Formik, Field } from 'formik';
-import { useSelector } from 'react-redux';
+import { Form, Input, Select, Button } from 'antd';
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, editTask } from './TaskSlice';
+import { selectProjects } from '../projects/projectsSelectors';
 import { selectUsers } from '../users/usersSelector';
-import { selectProjects } from '../projects/projectsSelectors'; 
-import { useDispatch } from 'react-redux';
-import { createTask, updateTask } from './TaskSlice'
-import { EditFilled } from '@ant-design/icons';
-import validationSchema from '../../app/validation/taskSchema'
-
- 
-const TaskForm = ({onSuccess, initialValues, mode = "create"}) => {
-    const isEdit = mode === 'edit';
-    const users = useSelector(selectUsers);
-    const projects = useSelector(selectProjects);
-    const dispatch = useDispatch();
+import { forwardRef, useImperativeHandle } from 'react';
 
 
 
+const { TextArea } = Input;
 
-return  (
- 
- <Formik
-  initialValues={ initialValues || {
-    title: '',  description: '',
-    status: 'todo',
-    
-    priority: 'medium',
-assignedTo: '',
-projectId: '', }}
-      validationSchema={validationSchema}
+const TaskForm = forwardRef((props, ref) => {
 
-  onSubmit={(values, {resetForm}) => {
-      if(isEdit){
-        dispatch(updateTask(values))
-      } else {
-        dispatch(createTask(values));}
-     resetForm();
-    console.log(values)
-    onSuccess();}}
->
-  {({handleSubmit,  values, handleChange, setFieldValue}) => (
-    <Form layout="vertical" onFinish={handleSubmit}>
-      <Field name="title">
-        {({ field, meta }) => (
-          <Form.Item
-            label="Назва задачі"
-            validateStatus={meta.touched && meta.error ? 'error' : ''}
-            help={meta.touched && meta.error ? meta.error : ''}
-          >
-            <Input {...field} placeholder="Наприклад: зварити каву" />
-          </Form.Item>
-        )}
-        </Field>
-      
-      <Form.Item label="Опис">
-    <Input.TextArea
+  const currentUser = useSelector(state => state.auth.user); 
+
+  const { onSuccess, initialValues = {}, mode = 'create' } = props;
+
+  const [form] = Form.useForm();
+  const dispatch = useDispatch();
+
+  const projects = useSelector(selectProjects);
+  const users = useSelector(selectUsers);
+
+  const selectedProjectId = Form.useWatch('projectId', form);
+
+  const issueTypes = useMemo(() => {
+    const project = projects.find(p => p.id === selectedProjectId);
+    return project?.issueTypes || [];
+  }, [selectedProjectId, projects]);
+
+  useEffect(() => {
+    form.setFieldsValue(initialValues);
+  }, [initialValues, form]);
+
+  const handleFinish = (values) => {
+      const taskData =  {
+    ...values,
+    ...(mode === 'create'
+      ? { createdBy: currentUser?.id }
+      : { updatedBy: currentUser?.id }
+    )
+  };
+
+    const action = mode === 'edit'
+    ? editTask({ id: initialValues.id, updates: taskData })
+    : addTask(taskData);
+
+    dispatch(action)
+      .unwrap()
+      .then((task) => {
+        form.resetFields();
+        onSuccess?.(task);
+      });
+ };
+    useImperativeHandle(ref, () => ({
+    resetFields: () => form.resetFields(),
+  }));
+
+  return (
+    <Form
+        preserve={false}
+
+      layout="vertical"
+      form={form}
+        id="taskForm" 
+      onFinish={handleFinish}
+    >
+      <Form.Item
+        label="Назва задачі"
+        name="title"
+        rules={[{ required: true, message: 'Введи назву задачі' }]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
+        label="Опис"
         name="description"
-        value={values.description}
-        onChange={handleChange}
-    />
-    </Form.Item>
+      >
+        <TextArea rows={3} />
+      </Form.Item>
 
-<Form.Item label="Статус">
-  <Select
-    name="status"
-    value={values.status}
-    onChange={(value) => setFieldValue('status', value)}
+      <Form.Item
+        label="Проєкт"
+        name="projectId"
+        rules={[{ required: true, message: 'Вибери проєкт' }]}
+      >
+        <Select placeholder="Оберіть проєкт">
+          {projects.map(project => (
+            <Select.Option key={project.id} value={project.id}>
+              {project.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="Тип задачі"
+        name="type"
+        rules={[{ required: true, message: 'Оберіть тип задачі' }]}
+      >
+        <Select placeholder="Тип задачі динамічно">
+          {issueTypes.map(type => (
+            <Select.Option key={type} value={type}>
+              {type}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="Статус"
+        name="status"
+        rules={[{ required: true }]}
+      >
+        <Select>
+          <Select.Option value="open">Відкрита</Select.Option>
+          <Select.Option value="in progress">У процесі</Select.Option>
+          <Select.Option value="done">Виконана</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="Пріоритет"
+        name="priority"
+        rules={[{ required: true }]}
+      >
+        <Select>
+          <Select.Option value="low">Низький</Select.Option>
+          <Select.Option value="medium">Середній</Select.Option>
+          <Select.Option value="high">Високий</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="Виконавець"
+        name="assignedTo"
+        rules={[]}
+      >
+        <Select placeholder="Оберіть користувача">
+          {users
+            .filter(user => user.role === 'user')
+            .map(user => (
+              <Select.Option key={user.id} value={user.id}>
+                {user.name}
+              </Select.Option>
+            ))}
+        </Select>
+      </Form.Item>
+      <Form.Item>
+  <Button
+    type="link"
+    onClick={() => form.setFieldsValue({ assignedTo: currentUser?.id })}
   >
-    <Select.Option value="todo">Очікує</Select.Option>
-    <Select.Option value="in-progress">В процесі</Select.Option>
-    <Select.Option value="done">Завершено</Select.Option>
-  </Select>
+    Асайнити на себе
+  </Button>
 </Form.Item>
 
-<Form.Item label="Пріоритет">
-  <Select
-    name="priority"
-    value={values.priority}
-    onChange={(value) => setFieldValue('priority', value)}
-  >
-    <Select.Option value="low">Низький</Select.Option>
-    <Select.Option value="medium">Середній</Select.Option>
-    <Select.Option value="high">Високий</Select.Option>
-  </Select>
-</Form.Item>
-<Form.Item label="Виконавець">
-  <Select
-    name="assignedTo"
-    value={values.assignedTo}
-    onChange={(value) => setFieldValue('assignedTo', value)}
-  >
-    {users
-      .filter(user => user.role === 'user' || user.role ==='admin') 
-      .map(user => (
-        <Select.Option key={user.id} value={user.id}>
-          {user.name}
-        </Select.Option>
-      ))}
-  </Select>
-</Form.Item>
-<Form.Item label="Проєкт">
-  <Select
-    name="projectId"
-    value={values.projectId}
-    onChange={(value) => setFieldValue('projectId', value)}
-  >
-    {projects.map(project => (
-      <Select.Option key={project.id} value={project.id}>
-        {project.name}
-      </Select.Option>
-    ))}
-  </Select>
-</Form.Item>
-
-
-
-
-      <Button type="primary" htmlType="submit">
-          {isEdit ? 'Зберегти зміни' : 'Створити'}
-
-      </Button>
+      <Form.Item>
+<Button type="primary" htmlType="submit" form="taskForm">
+            {mode === 'edit' ? 'Зберегти зміни' : 'Створити задачу'}
+        </Button>
+      </Form.Item>
     </Form>
-  )}
-</Formik>
-)
-}
+  );
+})
 
 export default TaskForm;

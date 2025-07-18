@@ -11,9 +11,7 @@ import {
 } from '@ant-design/icons';
 import ProfileModal from '../features/auth/ProfileModal';
 import { useState } from 'react';
-
-
-
+import GlobalActions from '../app/ui/GlobalActions'
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -25,13 +23,10 @@ const AppHeader = () => {
   const handleLogout = () => dispatch(logout());
 
   const handleSettings = () => {
-    // todo: показати модалку профілю або перейти на сторінку
       setIsProfileOpen(true); 
     console.log('🛠️ Налаштування профілю');
   };
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-  
 
   const getRoleIcon = (role) => {
     switch (role) {
@@ -59,6 +54,7 @@ const AppHeader = () => {
       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
         Вийти
       </Menu.Item>
+
     </Menu>
   );
 
@@ -73,9 +69,10 @@ const AppHeader = () => {
       }}
     >
       <div>TaskFlow — система управління задачами</div>
+       <GlobalActions />
 
       {user && (
-        <Dropdown overlay={menu} placement="bottomRight">
+        <Dropdown menu={menu} placement="bottomRight">
           <Space style={{ cursor: 'pointer', color: '#fff' }}>
             <Avatar icon={<UserOutlined />} />
             {user.name || user.email}

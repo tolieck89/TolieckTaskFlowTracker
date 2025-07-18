@@ -11,6 +11,8 @@ const projectValidationSchema = Yup.object({
     .min(20, 'Мінімум 20 символів'),
   issueTypes: Yup.mixed()
    .required('Оберіть проєкт'),
+   taskType: Yup.string().required('Оберіть тип задачі'),
+
 });
 
 export default projectValidationSchema;

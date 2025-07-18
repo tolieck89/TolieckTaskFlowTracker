@@ -2,22 +2,34 @@ import { Tabs, Form, Input, Button } from 'antd';
 import { useState } from 'react';
 import { useAppDispatch } from '../../app/hooks';
 import { login, register } from './authSlice';
+import {addNewUser} from '../users/userSlice'
+
 
 const AuthForm = ({ onSuccess }) => {
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState('login');
   const dispatch = useAppDispatch();
 
-  const handleFinish = (values) => {
-    if (activeTab === 'login') {
-      dispatch(login(values));
-    } else {
-      dispatch(register(values));
-    }
+const handleFinish = (values) => {
+  if (activeTab === 'login') {
+    dispatch(login(values));
     onSuccess(); 
     form.resetFields();
-  };
-  
+  } else {
+    dispatch(addNewUser({ ...values, role: 'user' }))
+      .unwrap()
+      .then((createdUser) => {
+        dispatch(register(createdUser));
+        onSuccess();
+        form.resetFields();
+      })
+      .catch((err) => {
+        console.error("Помилка реєстрації:", err);
+      });
+
+  }
+};
+
   return (
     <Tabs activeKey={activeTab} onChange={setActiveTab}>
       <Tabs.TabPane tab="Увійти" key="login">
