@@ -39,24 +39,38 @@ const AppHeader = () => {
     }
   };
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="role" disabled>
+const menu = {
+  items: [
+    {
+      key: 'role',
+      label: (
         <Space>
           {getRoleIcon(user?.role)}
           <Text type="secondary">{user?.role}</Text>
         </Space>
-      </Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="settings" icon={<SettingOutlined />} onClick={handleSettings}>
-        Налаштування
-      </Menu.Item>
-      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-        Вийти
-      </Menu.Item>
+      ),
+      disabled: true,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'settings',
+      label: 'Налаштування',
+      icon: <SettingOutlined />,
+    },
+    {
+      key: 'logout',
+      label: 'Вийти',
+      icon: <LogoutOutlined />,
+    },
+  ],
+  onClick: ({ key }) => {
+    if (key === 'logout') handleLogout()
+    if (key === 'settings') handleSettings()
+  },
+}
 
-    </Menu>
-  );
 
   return (
     <Header
@@ -72,12 +86,15 @@ const AppHeader = () => {
        <GlobalActions />
 
       {user && (
-        <Dropdown menu={menu} placement="bottomRight">
-          <Space style={{ cursor: 'pointer', color: '#fff' }}>
-            <Avatar icon={<UserOutlined />} />
-            {user.name || user.email}
-          </Space>
-        </Dropdown>
+<Dropdown menu={menu} placement="bottomRight">
+  <span style={{ cursor: 'pointer', color: '#fff' }}>
+    <Space>
+      <Avatar icon={<UserOutlined />} />
+      {user.name || user.email}
+    </Space>
+  </span>
+</Dropdown>
+
       )}
       <ProfileModal open={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 

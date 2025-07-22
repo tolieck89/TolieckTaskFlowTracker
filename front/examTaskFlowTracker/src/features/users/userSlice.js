@@ -4,6 +4,8 @@ import { getAllUsers, addUser, updateUser, deleteUser } from '../../api/usersApi
 const initialState = {
   list: [],
   loading: false,
+    status: 'idle',
+
   error: null,
 };
 
@@ -23,6 +25,13 @@ export const addNewUser = createAsyncThunk(
   }
 );
 
+export const deleteUserById = createAsyncThunk(
+  'users/deleteUserById',
+  async (id) => {
+    await deleteUser(id);
+    return id;
+  }
+);
 export const updateUserData = createAsyncThunk(
   'users/updateUserData',
   async ({ id, updatedData }) => {
@@ -31,13 +40,6 @@ export const updateUserData = createAsyncThunk(
   }
 );
 
-export const deleteUserById = createAsyncThunk(
-  'users/deleteUserById',
-  async (id) => {
-    await deleteUser(id);
-    return id;
-  }
-);
 
 const userSlice = createSlice({
   name: 'users',
@@ -66,13 +68,16 @@ const userSlice = createSlice({
       .addCase(addNewUser.fulfilled, (state, action) => {
          state.list.push(action.payload);
 })
-      .addCase(updateUserData.fulfilled, (state, action) => {
-        const updated = action.payload;
-        const index = state.list.findIndex((u) => u.id === updated.id);
-        if (index !== -1) {
-          state.list[index] = updated;
-        }
-      })
+    .addCase(updateUserData.fulfilled, (state, action) => {
+  const updatedUser = action.payload;
+  const index = state.list.findIndex(user => user._id === updatedUser._id);
+
+  if (index !== -1) {
+    state.list[index] = updatedUser;
+  } else {
+    state.list.push(updatedUser);
+  }
+})
       .addCase(deleteUserById.fulfilled, (state, action) => {
         const id = action.payload;
         state.list = state.list.filter((u) => u.id !== id);
@@ -87,3 +92,4 @@ const userSlice = createSlice({
 export const { updateUserRole } = userSlice.actions;
 export const selectUsers = (state) => state.users.list;
 export default userSlice.reducer;
+ 

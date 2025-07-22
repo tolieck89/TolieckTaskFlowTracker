@@ -25,11 +25,20 @@ const ProjectTasks = () => {
     return matchStatus && matchPriority;
   });
 
+  const mappedTasks = filteredTasks.map((task) => ({
+    ...task,
+    assigneeName: users.find((u) => u.id === task.assignedTo)?.name || '',
+    creatorName: users.find((u) => u.id === task.createdBy)?.name || '',
+  }));
+
   const columns = [
     {
       title: 'Назва задачі',
       dataIndex: 'title',
       key: 'title',
+      sorter: (a, b) => a.title.localeCompare(b.title),
+      sortDirections: ['ascend', 'descend'],
+
       render: (text, record) => (
         <span
           style={{ color: '#1677ff', cursor: 'pointer' }}
@@ -43,35 +52,41 @@ const ProjectTasks = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
+      sorter: (a, b) => a.id.localeCompare(b.id),
     },
     {
       title: 'Assignee',
-      dataIndex: 'assignedTo',
-      key: 'assignedTo',
-      render: (userId) => users.find((u) => u.id === userId)?.name || '—',
+      dataIndex: 'assigneeName',
+      key: 'assigneeName',
+      sorter: (a, b) => a.assigneeName.localeCompare(b.assigneeName),
+      render: (_, record) => record.assigneeName || '—',
     },
     {
       title: 'Creator',
-      dataIndex: 'createdBy',
-      key: 'createdBy',
-      render: (id) => users.find((u) => u.id === id)?.name || '—',
+      dataIndex: 'creatorName',
+      key: 'creatorName',
+      sorter: (a, b) => a.creatorName.localeCompare(b.creatorName),
+      render: (_, record) => record.creatorName || '—',
     },
     {
       title: 'Created At',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       render: (val) => new Date(val).toLocaleString(),
     },
     {
       title: 'Updated At',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
+      sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
       render: (val) => new Date(val).toLocaleString(),
     },
     {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
+      sorter: (a, b) => a.status.localeCompare(b.status),
       render: (status) => (
         <Tag
           color={STATUS_COLORS[status]}
@@ -88,6 +103,7 @@ const ProjectTasks = () => {
       title: 'Пріоритет',
       dataIndex: 'priority',
       key: 'priority',
+      sorter: (a, b) => a.priority.localeCompare(b.priority),
       render: (priority) => (
         <Tag
           color={PRIORITY_COLORS[priority]}
@@ -113,7 +129,7 @@ const ProjectTasks = () => {
         </div>
       )}
 
-      <Table columns={columns} dataSource={filteredTasks} rowKey="id" />
+      <Table columns={columns} dataSource={mappedTasks} rowKey="id" />
     </div>
   );
 };

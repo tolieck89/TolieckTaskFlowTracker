@@ -25,6 +25,8 @@ const ProjectList = () => {
   setSelectedProject(project);
   setIsModalOpen(true);
 };
+console.log('Всі проєкти з Redux:', projects);
+
 
   return (
     <>
@@ -36,7 +38,7 @@ const ProjectList = () => {
         <List.Item key={project.id}>
           <Card  title={
     <div onClick={() => navigate(`/projects/${project.id}`)} style={{ cursor: 'pointer' }}>
-      {project.name}
+      {project.title}
     </div>}
           >
             

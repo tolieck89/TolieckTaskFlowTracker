@@ -31,18 +31,27 @@ const tasksSlice = createSlice({
       .addCase(fetchTasks.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchTasks.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.list = action.payload;
-      })
+     .addCase(fetchTasks.fulfilled, (state, action) => {
+  state.status = 'succeeded';
+
+  state.list = action.payload.map((task) => ({
+    ...task,
+    id: task._id, 
+  }));
+})
+
       .addCase(fetchTasks.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
       })
 
-      .addCase(addTask.fulfilled, (state, action) => {
-        state.list.push(action.payload);
-      })
+.addCase(addTask.fulfilled, (state, action) => {
+  state.list.push({
+    ...action.payload,
+    id: action.payload._id,
+  });
+})
+
 
       .addCase(editTask.fulfilled, (state, action) => {
         const idx = state.list.findIndex((t) => t.id === action.payload.id);

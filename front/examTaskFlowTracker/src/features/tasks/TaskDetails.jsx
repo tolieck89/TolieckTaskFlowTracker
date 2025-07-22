@@ -12,11 +12,13 @@ const TaskDetails = ({ task }) => {
   const dispatch = useDispatch();
   // const editTask = useSelector(selectTasks);
   const currentUser = useSelector((state) => state.auth.user);
+  if (currentUser?.id && task.assignedTo !== currentUser.id)
+
+  if (!task) return <div>Задача не знайдена</div>;
 
 const creator = users.find(u => u.id === task.createdBy);
   const updater = users.find(u => u.id === task.updatedBy);
   const assignee = users.find(u => u.id === task.assignedTo);
-  if (!task) return <div>Задача не знайдена</div>;
 
 return (
     <>

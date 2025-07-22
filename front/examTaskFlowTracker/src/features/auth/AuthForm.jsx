@@ -1,8 +1,9 @@
 import { Tabs, Form, Input, Button } from 'antd';
 import { useState } from 'react';
 import { useAppDispatch } from '../../app/hooks';
-import { login, register } from './authSlice';
-import {addNewUser} from '../users/userSlice'
+import * as authApi from '../../api/authApi'; 
+import {  registerUser, loginUser } from './authSlice';
+
 
 
 const AuthForm = ({ onSuccess }) => {
@@ -10,25 +11,33 @@ const AuthForm = ({ onSuccess }) => {
   const [activeTab, setActiveTab] = useState('login');
   const dispatch = useAppDispatch();
 
-const handleFinish = (values) => {
-  if (activeTab === 'login') {
-    dispatch(login(values));
-    onSuccess(); 
-    form.resetFields();
-  } else {
-    dispatch(addNewUser({ ...values, role: 'user' }))
-      .unwrap()
-      .then((createdUser) => {
-        dispatch(register(createdUser));
-        onSuccess();
-        form.resetFields();
-      })
-      .catch((err) => {
-        console.error("Помилка реєстрації:", err);
-      });
 
+const handleFinish = async (values) => {
+  console.log("🔥 handleFinish called", values);
+
+  if (activeTab === 'login') {
+    const result = await dispatch(loginUser(values));
+    if (result.meta.requestStatus === 'fulfilled' && onSuccess) {
+      onSuccess();
+    }
+  } else {
+    const regResult = await dispatch(registerUser(values));
+
+    if (regResult.meta.requestStatus === 'fulfilled') {
+      const loginResult = await dispatch(loginUser({
+        email: values.email,
+        password: values.password,
+      }));
+
+      if (loginResult.meta.requestStatus === 'fulfilled' && onSuccess) {
+        onSuccess();
+      }
+    } else {
+      console.error("❌ Реєстрація не пройшла");
+    }
   }
 };
+
 
   return (
     <Tabs activeKey={activeTab} onChange={setActiveTab}>

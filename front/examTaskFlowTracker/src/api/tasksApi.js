@@ -1,41 +1,49 @@
-const STORAGE_KEY = 'taskflow_tasks';
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+const BASE_URL = 'http://localhost:3000/api/tasks';
+
+const getToken = () => {
+  const user = JSON.parse(localStorage.getItem('user')); 
+  return user?.token;
+};
+
 
 export const getTasks = async () => {
-  await delay(300);
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return JSON.parse(raw) || [];
+  const res = await fetch(BASE_URL, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  if (!res.ok) throw new Error('Не вдалося завантажити задачі');
+  return await res.json();
 };
 
 export const createTask = async (task) => {
-  await delay(300);
-  const tasks = await getTasks();
-  const newTask = {
-    ...task,
-  id: crypto.randomUUID(),
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  };
-  const updated = [...tasks, newTask];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  return newTask;
+  const res = await fetch(BASE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(task),
+  });
+  if (!res.ok) throw new Error('Помилка при створенні задачі');
+  return await res.json();
 };
 
 export const updateTask = async (id, updates) => {
-  const tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  const idx = tasks.findIndex(t => t.id === id);
-  if (idx !== -1) {
-    tasks[idx] = { ...tasks[idx], ...updates, updatedAt: new Date().toISOString() };
-    localStorage.setItem((STORAGE_KEY), JSON.stringify(tasks));
-    return tasks[idx]; 
-  }
-  throw new Error('Задачу не знайдено');
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) throw new Error('Помилка при оновленні задачі');
+  return await res.json();
 };
 
 export const deleteTask = async (id) => {
-  await delay(300);
-  const tasks = await getTasks();
-  const filtered = tasks.filter(t => t.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+  const res = await fetch(`${BASE_URL}/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  if (!res.ok) throw new Error('Помилка при видаленні задачі');
 };
-

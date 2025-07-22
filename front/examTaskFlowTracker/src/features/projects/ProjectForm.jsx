@@ -32,7 +32,7 @@ const ProjectForm = ({ initialValues, mode = 'create', onSuccess }) => {
     >
       <Form.Item
         label="Назва"
-        name="name"
+        name="title"
         rules={[{ required: true, message: 'Вкажи назву проєкту' }]}
       >
         <Input />

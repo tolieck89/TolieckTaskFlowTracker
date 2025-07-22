@@ -21,6 +21,12 @@ const TaskForm = forwardRef((props, ref) => {
 
   const projects = useSelector(selectProjects);
   const users = useSelector(selectUsers);
+  useEffect(() => {
+  if (initialValues && Object.values(initialValues).every(val => val !== null)) {
+    form.setFieldsValue(initialValues);
+  }
+}, [initialValues, form]);
+
 
   const selectedProjectId = Form.useWatch('projectId', form);
 
@@ -81,32 +87,28 @@ const TaskForm = forwardRef((props, ref) => {
         <TextArea rows={3} />
       </Form.Item>
 
-      <Form.Item
-        label="Проєкт"
-        name="projectId"
-        rules={[{ required: true, message: 'Вибери проєкт' }]}
-      >
-        <Select placeholder="Оберіть проєкт">
-          {projects.map(project => (
-            <Select.Option key={project.id} value={project.id}>
-              {project.name}
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
+      <Form.Item name="projectId" label="Проєкт">
+  <Select placeholder="Оберіть проєкт">
+    {projects.map((project) => (
+      <Select.Option key={project.id} value={project.id}>
+        {project.title}
+      </Select.Option>
+    ))}
+  </Select>
+</Form.Item>
 
       <Form.Item
         label="Тип задачі"
         name="type"
         rules={[{ required: true, message: 'Оберіть тип задачі' }]}
       >
-        <Select placeholder="Тип задачі динамічно">
-          {issueTypes.map(type => (
-            <Select.Option key={type} value={type}>
-              {type}
-            </Select.Option>
-          ))}
-        </Select>
+       <Select placeholder="Тип задачі">
+  {issueTypes.map(type => (
+    <Select.Option key={type} value={type}>
+      {type}
+    </Select.Option>
+  ))}
+</Select>
       </Form.Item>
 
       <Form.Item
@@ -149,6 +151,14 @@ const TaskForm = forwardRef((props, ref) => {
         </Select>
       </Form.Item>
       <Form.Item>
+        <Form.Item label="Теги" name="tags">
+  <Select
+    mode="tags"
+    style={{ width: '100%' }}
+    placeholder="Введіть або оберіть теги"
+  />
+</Form.Item>
+
   <Button
     type="link"
     onClick={() => form.setFieldsValue({ assignedTo: currentUser?.id })}

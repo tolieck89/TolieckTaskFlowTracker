@@ -18,21 +18,18 @@ const roleColors= {
 const UserList = () => {
 
 
-    const currentUser = useAppSelector((state) => state.auth.user);
-    const users = useAppSelector((state) => state.users.list);
-    const dispatch = useAppDispatch();
-    const isAdmin = currentUser?.role === 'admin';
+   const currentUser = useAppSelector((state) => state.auth.user);
+  const users = useAppSelector((state) => state.users.list);
+  const dispatch = useAppDispatch();
+  const isAdmin = currentUser?.role === 'admin';
 
-
-
-    
-    useEffect(() => {
+  useEffect(() => {
     dispatch(fetchUsers());
     }, [dispatch]);
 
 
 
-    const isSuper = isSuperadmin(currentUser);
+  const isSuper = isSuperadmin(currentUser);
 
     const allowedRoles = (targetUser) => {
     if (isSuper) return ['admin', 'user', 'watcher'];
@@ -53,16 +50,19 @@ const columns = [
     dataIndex: 'role',
     key: 'role',
     render: (role, record) => {
-  const availableRoles = allowedRoles(record);
+  
 
+  const availableRoles = allowedRoles(record);
+    console.log('🎯 record:', record);
+console.log('✅ availableRoles:', availableRoles);
 
 
   return availableRoles.length > 0 && record.email !== currentUser.email ? (
     <Select
       value={role}
       onChange={(newRole) => {
-        dispatch(updateUserData({ id: record.id, updatedData: { role: newRole } }));
-        if (record.id === currentUser.id) {
+        dispatch(updateUserData({ id: record._id, updatedData: { role: newRole } }));
+        if (record._id === currentUser._id) {
           dispatch(updateUser({ role: newRole })); 
         }
       }}
@@ -79,7 +79,7 @@ const columns = [
 ];
 
     return (
-        <Table columns={columns} dataSource={users} rowKey="id" />
+        <Table columns={columns} dataSource={users} rowKey="_id" />
     );
 }
 

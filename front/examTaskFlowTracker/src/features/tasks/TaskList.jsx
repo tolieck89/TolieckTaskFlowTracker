@@ -23,14 +23,19 @@ const TaskList = () => {
   const searchParams = new URLSearchParams(location.search);
   const statusFilter = searchParams.get('status');
   const priorityFilter = searchParams.get('priority');
+  
+const tagFilter = searchParams.get('tag');
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
-      const byStatus = statusFilter ? task.status === statusFilter : true;
-      const byPriority = priorityFilter ? task.priority === priorityFilter : true;
-      return byStatus && byPriority;
-    });
-  }, [tasks, statusFilter, priorityFilter]);
+
+const filteredTasks = useMemo(() => {
+  return tasks.filter(task => {
+    const byStatus = statusFilter ? task.status === statusFilter : true;
+    const byPriority = priorityFilter ? task.priority === priorityFilter : true;
+    const byTag = tagFilter ? task.tags?.includes(tagFilter) : true;
+    return byStatus && byPriority && byTag;
+  });
+}, [tasks, statusFilter, priorityFilter, tagFilter]);
+
 
   const openEditModal = (task) => {
     setSelectedTask(task);
@@ -45,61 +50,76 @@ const TaskList = () => {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-        {(statusFilter || priorityFilter) && (
+        {(statusFilter || priorityFilter || tagFilter) && (
           <Button onClick={() => navigate('/tasks')}>Очистити фільтри</Button>
         )}
       </div>
 
-      <List 
-        grid={{ gutter: 16, column: 3 }}
-        dataSource={filteredTasks}
-        renderItem={(task) => (
-          <List.Item key={task.id}>
-            <Card>
-              <h3>
-                <span
-                  style={{ color: '#1677ff', cursor: 'pointer' }}
-                  onClick={() => openEditModal(task)}
-                >
-                  {task.title}
-                </span>
-              </h3>
+   <List 
+  grid={{ gutter: 16, column: 3 }}
+  dataSource={filteredTasks}
+  renderItem={(task) => (
+    <List.Item key={task.id}>
+      <Card>
+        <h3>
+          <span
+            style={{ color: '#1677ff', cursor: 'pointer' }}
+            onClick={() => openEditModal(task)}
+          >
+            {task.title}
+          </span>
+        </h3>
 
-              <p>Summary: {task.description}</p>
+        <p>Summary: {task.description}</p>
 
-              <Tag
-                color={STATUS_COLORS[task.status]}
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate(`/tasks?status=${task.status}`)}
-              >
-                {task.status}
-              </Tag>
+        <Tag
+          color={STATUS_COLORS[task.status]}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/tasks?status=${task.status}`)}
+        >
+          {task.status}
+        </Tag>
 
-              <Tag
-                color={PRIORITY_COLORS[task.priority]}
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate(`/tasks?priority=${task.priority}`)}
-              >
-                {task.priority}
-              </Tag>
+        <Tag
+          color={PRIORITY_COLORS[task.priority]}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/tasks?priority=${task.priority}`)}
+        >
+          {task.priority}
+        </Tag>
 
-              <p>👤 AssignedTo: {users.find(u => u.id === task.assignedTo)?.name || '-'}</p>
-              <p>📁 Project: {projects.find(p => p.id === task.projectId)?.name || '-'}</p>
-              <p>👤 Створив: {users.find(u => u.id === task.createdBy)?.name || '—'}</p>
-              <p>🛠 Оновив: {users.find(u => u.id === task.updatedBy)?.name || '—'}</p>
+        <div style={{ marginTop: 8 }}>
+          {task.tags?.map(tag => (
+            <Tag
+              key={tag}
+              color="blue"
+              style={{ cursor: 'pointer', marginTop: 4 }}
+              onClick={() => navigate(`/tasks?tag=${tag}`)}
+            >
+              {tag}
+            </Tag>
+          ))}
+        </div>
 
-              <Popconfirm
-                title="Точно видалити задачу?"
-                onConfirm={() => dispatch(removeTask(task.id))}
-                okText="Так"
-                cancelText="Скасувати"
-              >
-                <Button danger size="small">Видалити</Button>
-              </Popconfirm>
-            </Card>
-          </List.Item>
-        )}
-      />
+        <p>👤 AssignedTo: {users.find(u => u.id === task.assignedTo)?.name || '-'}</p>
+        <p>📁 Project: {projects.find(p => p.id === task.projectId)?.name || '-'}</p>
+        <p>👤 Створив: {users.find(u => u.id === task.createdBy)?.name || '—'}</p>
+        <p>🛠 Оновив: {users.find(u => u.id === task.updatedBy)?.name || '—'}</p>
+
+        {/* Видалити */}
+        <Popconfirm
+          title="Точно видалити задачу?"
+          onConfirm={() => dispatch(removeTask(task.id))}
+          okText="Так"
+          cancelText="Скасувати"
+        >
+          <Button danger size="small">Видалити</Button>
+        </Popconfirm>
+      </Card>
+    </List.Item>
+  )}
+/>
+
 
       <TaskFormModal
         open={isModalOpen}

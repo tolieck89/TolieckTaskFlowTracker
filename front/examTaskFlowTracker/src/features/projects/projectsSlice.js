@@ -31,12 +31,16 @@ const projectSlice = createSlice({
       .addCase(fetchProjects.pending, (state) => {
         state.status = 'loading';
       })
+      
       .addCase(fetchProjects.fulfilled, (state, action) => {
-          // console.log('📦 fulfilled payload', action.payload);
+  state.status = 'succeeded';
+  state.list = action.payload.map(project => ({
+    ...project,
+    id: project._id, 
+  }));
+})
 
-        state.status = 'succeeded';
-        state.list = action.payload;
-      })
+
       .addCase(fetchProjects.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
